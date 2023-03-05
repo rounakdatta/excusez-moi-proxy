@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Response
+import fastapi
 
-router = APIRouter()
+router = fastapi.APIRouter()
 
 @router.get("/health")
 async def get_health():
-    return Response(content="OK", status_code=200)
+    return fastapi.Response(content="OK", status_code=200)
