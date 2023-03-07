@@ -85,13 +85,16 @@ async def run_migrations_online():
 
     await set_up_vector_migration()
 
+# additional setup to get custom vector datatype working
 async def set_up_vector_migration():
     url = config.get_main_option("asyncpg.url")
     conn = await asyncpg.connect(
         dsn=url
     )
 
+    # register the vector datatype against the database migrations to be used by albemic
     await register_vector(conn)
+    await conn.close()
 
 if context.is_offline_mode():
     run_migrations_offline()
