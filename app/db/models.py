@@ -24,6 +24,7 @@ class Embedding(Base):
     # the pgvector extension supports only upto 2000 dimensions
     # https://github.com/pgvector/pgvector#what-if-i-want-to-index-vectors-with-more-than-2000-dimensions
     embedding = Column(Vector(OPENAI_MAX_EMBEDDING_DIMENSIONS))
+    embedding_id = Column(String, index=True)
     encoded_raw_payload = Column(String)
     requester_id = Column(Integer, ForeignKey("users.id"))
     requester = relationship("User", back_populates="embeddings")

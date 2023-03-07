@@ -1,5 +1,6 @@
 import asyncpg
 from asyncpg.pool import Pool
+from config.db import DatabaseConfig
 
 class Database:
     def __init__(self, url: str):
@@ -25,3 +26,10 @@ class Database:
     async def execute(self, query: str, *args):
         async with self.pool.acquire() as connection:
             return await connection.execute(query, *args)
+
+# intialize the database connections
+db_config = DatabaseConfig()
+db_conn = Database(db_config.db_config_urn)
+
+def get_db_conn():
+    return db_conn
