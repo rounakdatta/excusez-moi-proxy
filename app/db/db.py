@@ -1,6 +1,7 @@
 import asyncpg
 from asyncpg.pool import Pool
-from config.db import DatabaseConfig
+from config.db import db_config
+from pgvector.asyncpg import register_vector
 
 class Database:
     def __init__(self, url: str):
@@ -27,8 +28,12 @@ class Database:
         async with self.pool.acquire() as connection:
             return await connection.execute(query, *args)
 
+    async def execute_with_vector_registered(self, query: str, *args):
+        async with self.pool.acquire() as connection:
+            await register_vector(connection)
+            return await connection.execute(query, *args)
+
 # intialize the database connections
-db_config = DatabaseConfig()
 db_conn = Database(db_config.db_config_urn)
 
 def get_db_conn():

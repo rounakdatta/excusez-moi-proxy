@@ -1,6 +1,8 @@
 import openai
 import hashlib
+import numpy
 from db.db import Database
+from utils.common import base64_encode_string
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
 
@@ -24,14 +26,19 @@ async def generate_id_for_embedding(url: str, payload: str):
 async def get_if_embeddings_already_generated(embedding_id: str):
     return {}
 
-# calls external OpenAI API to generate the embeddings array
-async def generate_embeddings_external(payload: str) -> list[float]:
+# calls external OpenAI API to generate the embeddings array, returned as numpy array
+async def generate_embeddings_external(payload: str):
     external_response = openai.Embedding.create(model=EMBEDDING_MODEL, input=payload)
     # TODO: make sure to store usage details into database
-    return external_response["data"][0]["embedding"]
+    return numpy.array(external_response["data"][0]["embedding"])
 
 # persists embedding to persistent storage so that it can be re-used
-async def persist_embeddings_to_storage(db: Database, embeddings: list[float], raw_payload: str, embedding_id: str):
-    # TODO: base64 encode the raw payloads
-    await db.execute("INSERT INTO embeddings (embedding, encoded_raw_payload, embedding_id) VALUES ($1, $2, $3)", embeddings, "REPLACE_ME", embedding_id)
+async def persist_embeddings_to_storage(db: Database, embeddings: numpy.ndarray, raw_payload: str, embedding_id: str):
+    embedding_data = {
+        "embedding": embeddings,
+        "raw_payload": await base64_encode_string(raw_payload),
+        "embedding_id": embedding_id
+    }
+    embedding_data_row = tuple(embedding_data.values())
+    await db.execute_with_vector_registered("INSERT INTO embeddings (embedding, encoded_raw_payload, embedding_id) VALUES ($1, $2, $3)", *embedding_data_row)
     return
