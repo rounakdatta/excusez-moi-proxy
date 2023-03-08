@@ -26,7 +26,8 @@ async def generate_embeddings(request: EmbeddingRequest, db: Database):
             await emb.generate_embeddings_external(request.content),
             request.content,
             request.url,
-            emb_id
+            emb_id,
+            "d" # to indicate document embedding
         )
 
 # TODO: remove this endpoint

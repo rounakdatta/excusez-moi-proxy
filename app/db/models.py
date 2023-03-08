@@ -27,6 +27,8 @@ class Embedding(Base):
     embedding_id = Column(String, index=True)
     encoded_raw_payload = Column(String)
     anchor_url = Column(String)
+    # content type can be `q` (query) or `d` (document)
+    content_type = Column(String)
     requester_id = Column(Integer, ForeignKey("users.id"))
     requester = relationship("User", back_populates="embeddings")
     created_at = Column(DateTime, default=datetime.utcnow())

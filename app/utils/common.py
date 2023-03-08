@@ -11,5 +11,7 @@ async def determine_request_validity():
     return True
 
 async def base64_encode_string(payload: str):
-    byte_encoding = payload.encode("ascii")
-    return str(base64.b64encode(byte_encoding))
+    return base64.b64encode(payload.encode()).decode()
+
+async def base64_decode_string(payload: str):
+    return base64.b64decode(payload).decode()

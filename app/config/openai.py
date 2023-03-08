@@ -11,6 +11,7 @@ class OpenAIConfig:
 
     # model names to be used
     embedding_model_name = "text-embedding-ada-002"
+    completion_model_name = "gpt-3.5-turbo"
 
 openai_config = OpenAIConfig()
 

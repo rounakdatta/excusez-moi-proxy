@@ -34,18 +34,19 @@ async def generate_embeddings_external(payload: str):
     return numpy.array(external_response["data"][0]["embedding"])
 
 # persists embedding to persistent storage so that it can be re-used
-async def persist_embeddings_to_storage(db: Database, embeddings: numpy.ndarray, raw_payload: str, url: str, embedding_id: str):
+async def persist_embeddings_to_storage(db: Database, embeddings: numpy.ndarray, raw_payload: str, url: str, embedding_id: str, content_type: str):
     embedding_data = {
         "embedding": embeddings,
         "raw_payload": await base64_encode_string(raw_payload),
         "anchor_url": await base64_encode_string(url),
-        "embedding_id": embedding_id
+        "embedding_id": embedding_id,
+        "content_type": content_type
     }
     embedding_data_row = tuple(embedding_data.values())
-    await db.execute_with_vector_registered("INSERT INTO embeddings (embedding, encoded_raw_payload, anchor_url, embedding_id) VALUES ($1, $2, $3, $4)", *embedding_data_row)
+    await db.execute_with_vector_registered("INSERT INTO embeddings (embedding, encoded_raw_payload, anchor_url, embedding_id, content_type) VALUES ($1, $2, $3, $4, $5)", *embedding_data_row)
     return
 
 async def search_nearest_embeddings(db: Database, search_query_embeddings: numpy.ndarray, url: str):
     anchor_url = await base64_encode_string(url)
-    search_results = await db.fetch_all("SELECT * FROM embeddings WHERE anchor_url = $1 ORDER by embedding <-> $2 LIMIT 10", anchor_url, search_query_embeddings)
+    search_results = await db.fetch_all("SELECT embedding_id, encoded_raw_payload FROM embeddings WHERE anchor_url = $1 AND content_type = 'd' ORDER by embedding <-> $2 LIMIT 10", anchor_url, search_query_embeddings)
     return search_results
