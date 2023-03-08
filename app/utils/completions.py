@@ -10,6 +10,7 @@ async def find_answer_to_question(nearest_embeddings: list, searchQuery: str):
     prompt = ". ".join(nearest_text_sections)
     searchResponse = openai.ChatCompletion.create(
         model=openai_config.completion_model_name,
+        temperature=0,
         messages=[
             # later introduce system dialogues for better framing
             {"role": "user", "content": "You will do reading comprehension. Answer exactly as asked, don't provide extra information."},
