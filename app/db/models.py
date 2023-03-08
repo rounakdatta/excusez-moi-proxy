@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from pgvector.sqlalchemy import Vector
 
 from datetime import datetime
-from app.config.openai import OPENAI_MAX_EMBEDDING_DIMENSIONS
+from app.config.openai import openai_config
 
 Base = declarative_base()
 
@@ -23,9 +23,10 @@ class Embedding(Base):
     id = Column(Integer, primary_key=True, index=True)
     # the pgvector extension supports only upto 2000 dimensions
     # https://github.com/pgvector/pgvector#what-if-i-want-to-index-vectors-with-more-than-2000-dimensions
-    embedding = Column(Vector(OPENAI_MAX_EMBEDDING_DIMENSIONS))
+    embedding = Column(Vector(openai_config.embedding_max_dimensions))
     embedding_id = Column(String, index=True)
     encoded_raw_payload = Column(String)
+    anchor_url = Column(String)
     requester_id = Column(Integer, ForeignKey("users.id"))
     requester = relationship("User", back_populates="embeddings")
     created_at = Column(DateTime, default=datetime.utcnow())

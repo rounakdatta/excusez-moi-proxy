@@ -20,6 +20,10 @@ class Database:
         async with self.pool.acquire() as connection:
             return await connection.fetchrow(query, *args)
 
+    async def fetch_val(self, query: str, *args):
+        async with self.pool.acquire() as connection:
+            return await connection.fetchval(query, *args)
+
     async def fetch_all(self, query: str, *args):
         async with self.pool.acquire() as connection:
             return await connection.fetch(query, *args)

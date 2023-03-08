@@ -1,12 +1,13 @@
 import fastapi
-from api.endpoints import health, embeddings
+from api.endpoints import health, preparation, search
 from db.db import Database, get_db_conn
 
 API_PREFIX = "/api/v1"
 app = fastapi.FastAPI()
 
 app.include_router(health.router, prefix=API_PREFIX)
-app.include_router(embeddings.router, prefix=API_PREFIX)
+app.include_router(preparation.router, prefix=API_PREFIX)
+app.include_router(search.router, prefix=API_PREFIX)
 
 db = get_db_conn()
 
