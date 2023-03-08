@@ -21,7 +21,7 @@ async def answer_question(request: EmbeddingRequest, db: Database = fastapi.Depe
 
     # we return OK to denote that the embedding is now ready to be used
     return fastapi.Response(content=str(answer), status_code=200)
-s
+
 async def generate_embeddings_and_return(request: EmbeddingRequest, db: Database):
     emb_id = await emb.generate_id_for_embedding(request.url, request.content)
     existing_embeddings = await emb.get_if_embeddings_already_generated(db, emb_id)
