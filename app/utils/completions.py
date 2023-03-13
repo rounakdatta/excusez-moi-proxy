@@ -13,11 +13,9 @@ async def find_answer_to_question(nearest_embeddings: list, searchQuery: str):
         temperature=0,
         messages=[
             # later introduce system dialogues for better framing
-            {"role": "user", "content": "You will do reading comprehension. Answer exactly as asked, don't provide extra information."},
-            {"role": "assistant", "content": "Okay."},
-            {"role": "user", "content": prompt},
-            {"role": "assistant", "content": "Okay, I've understood everything you just told."},
-            {"role": "user", "content": searchQuery}
+            {"role": "user", "content": 'Answer exactly the matching term, absolutely nothing else. Your answer should be in the form of a valid JSON {"resp": "<answer>"}. If there is no answer, just say OK'},
+            {"role": "assistant", "content": '{"resp": "OK"}'},
+            {"role": "user", "content": prompt + ". " + searchQuery}
         ]
     )
 
