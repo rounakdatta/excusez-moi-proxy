@@ -18,6 +18,7 @@ class Database:
 
     async def fetch_one(self, query: str, *args):
         async with self.pool.acquire() as connection:
+            await register_vector(connection)
             return await connection.fetchrow(query, *args)
 
     async def fetch_val(self, query: str, *args):
@@ -32,10 +33,10 @@ class Database:
         async with self.pool.acquire() as connection:
             return await connection.execute(query, *args)
 
-    async def execute_with_vector_registered(self, query: str, *args):
+    async def execute_with_vector_registered(self, query: str, args):
         async with self.pool.acquire() as connection:
             await register_vector(connection)
-            return await connection.execute(query, *args)
+            return await connection.executemany(query, args)
 
 # intialize the database connections
 db_conn = Database(db_config.db_config_urn)

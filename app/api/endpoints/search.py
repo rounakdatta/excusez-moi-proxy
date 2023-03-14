@@ -16,11 +16,11 @@ async def answer_question(request: EmbeddingRequest, db: Database = fastapi.Depe
     search_query_embeddings = await generate_embeddings_and_return(request, db)
     nearest_sections = await emb.search_nearest_embeddings(db, search_query_embeddings, request.url)
 
-    response = await comp.find_answer_to_question(nearest_sections, request.content)
-    answer = response['choices'][0]['message']['content']
+    responses = await comp.find_answer_to_question(nearest_sections, request.content)
+    answers = [response['choices'][0]['message']['content'] for response in responses]
 
     # we return OK to denote that the embedding is now ready to be used
-    return fastapi.Response(content=str(answer), status_code=200)
+    return fastapi.Response(content=str(answers), status_code=200)
 
 async def generate_embeddings_and_return(request: EmbeddingRequest, db: Database):
     emb_id = await emb.generate_id_for_embedding(request.url, request.content)
@@ -32,7 +32,7 @@ async def generate_embeddings_and_return(request: EmbeddingRequest, db: Database
     await emb.persist_embeddings_to_storage(
         db,
         generated_embeddings,
-        request.content,
+        [request.content],
         request.url,
         emb_id,
         "q" # to indicate query embedding
