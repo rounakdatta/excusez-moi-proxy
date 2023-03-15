@@ -27,7 +27,7 @@ async def check_if_embeddings_already_generated(db: Database, embedding_id: str)
     return await db.fetch_val("SELECT EXISTS(SELECT 1 FROM embeddings WHERE embedding_id = $1)", embedding_id)
 
 async def get_if_embeddings_already_generated(db: Database, embedding_id: str):
-    return await db.fetch_one("SELECT * FROM embeddings WHERE embedding_id = $1", embedding_id)
+    return await db.fetch_all("SELECT * FROM embeddings WHERE embedding_id = $1", embedding_id)
 
 # utility to break down the complete document into smaller chunks to be batch sent for generating embeddings
 # smaller embeddings (think RISC) help reduce the base data while querying as well
@@ -43,6 +43,7 @@ async def break_down_document(payload: str, sentence_splitter):
 
 # calls external OpenAI API to generate the embeddings array, returned as numpy array
 async def generate_embeddings_external(payload):
+    print(payload)
     external_response = openai.Embedding.create(model=openai_config.embedding_model_name, input=payload)
     # TODO: make sure to store usage details into database
     return [numpy.array(el["embedding"]) for el in external_response["data"]]
