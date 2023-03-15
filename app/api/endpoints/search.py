@@ -17,10 +17,8 @@ async def answer_question(request: EmbeddingRequest, db: Database = fastapi.Depe
     search_query_embeddings = await generate_embeddings_and_return(request, db)
     # we can confidently send just the first embedding (queries are small)
     nearest_sections = await emb.search_nearest_embeddings(db, search_query_embeddings[0], request.url)
-    print("found nearby sections", len(nearest_sections))
 
     responses = await comp.find_answer_to_question(nearest_sections, request.content)
-    print(responses)
     # answers = [json.loads(response) for response in responses]
 
     # we return OK to denote that the embedding is now ready to be used

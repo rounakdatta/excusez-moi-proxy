@@ -43,7 +43,6 @@ async def break_down_document(payload: str, sentence_splitter):
 
 # calls external OpenAI API to generate the embeddings array, returned as numpy array
 async def generate_embeddings_external(payload):
-    print(payload)
     external_response = openai.Embedding.create(model=openai_config.embedding_model_name, input=payload)
     # TODO: make sure to store usage details into database
     return [numpy.array(el["embedding"]) for el in external_response["data"]]

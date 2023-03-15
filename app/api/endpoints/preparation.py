@@ -24,7 +24,6 @@ async def generate_embeddings(request: EmbeddingRequest, db: Database):
 
     if not does_already_exist:
         collection_of_documents = await emb.break_down_document(request.content, sentence_splitter)
-        print("broken down into " + str(len(collection_of_documents)))
         collection_of_embeddings = await emb.generate_embeddings_external(collection_of_documents)
 
         await emb.persist_embeddings_to_storage(
