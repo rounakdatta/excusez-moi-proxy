@@ -6,7 +6,12 @@ from utils.common import base64_encode_string, base64_decode_string, count_embed
 from config.openai import openai_config
 import json
 
+
 async def find_answer_to_question(nearest_embeddings: list, search_query: str):
+    """
+    Seek the answer given the nearest embeddings (context) and the search query.
+    This also decides whether to make a single or multiple chat completion calls.
+    """
     nearest_text_sections = [await base64_decode_string(e["encoded_raw_payload"]) for e in nearest_embeddings]
     prompt = ". ".join(nearest_text_sections)
 
@@ -19,15 +24,23 @@ async def find_answer_to_question(nearest_embeddings: list, search_query: str):
     else:
         # else we bank on multiple API calls
         n_of_splits = total_token_count // openai_config.completion_model_optimal_input_tokens
-        collection_of_calls = numpy.array_split(nearest_text_sections, n_of_splits)
-        collection_of_calls = [". ".join(list(el)) for el in collection_of_calls]
+        collection_of_calls = numpy.array_split(
+            nearest_text_sections, n_of_splits)
+        collection_of_calls = [". ".join(list(el))
+                               for el in collection_of_calls]
 
         chat_completion_responses = [await generate_chat_completion_external(call, search_query) for call in collection_of_calls]
 
-    chat_completion_responses = [json.loads(el['choices'][0]['message']['content']) for el in chat_completion_responses]
+    chat_completion_responses = [json.loads(
+        el['choices'][0]['message']['content']) for el in chat_completion_responses]
     return {"answers": chat_completion_responses}
 
+
 async def generate_chat_completion_external(chat_text: str, search_query: str):
+    """
+    Use external API (OpenAI) to generate the chat completions for a given chat context and a search.
+    Contains all the prompt engineering techniques to receive structured answers.
+    """
     try:
         searchResponse = openai.ChatCompletion.create(
             model=openai_config.completion_model_name,

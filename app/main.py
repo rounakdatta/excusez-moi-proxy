@@ -11,10 +11,11 @@ app.include_router(search.router, prefix=API_PREFIX)
 
 db = get_db_conn()
 
-# we'll make sure to connect/disconnect from the database gracefully
+
 @app.on_event("startup")
 async def startup():
     await db.connect()
+
 
 @app.on_event("shutdown")
 async def shutdown():

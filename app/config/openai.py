@@ -1,6 +1,7 @@
 import os
 import openai
 
+
 class OpenAIConfig:
     org = os.getenv("OPENAI_ORGANIZATION")
     api_key = os.getenv("OPENAI_API_KEY")
@@ -26,7 +27,9 @@ class OpenAIConfig:
     embedding_token_encoder_name = "cl100k_base"
     completion_token_encoder_name = "cl100k_base"
 
+
 openai_config = OpenAIConfig()
+
 
 def get_openai_configured():
     openai.organization = openai_config.org
