@@ -4,8 +4,10 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy import create_engine
 from pgvector.asyncpg import register_vector
 import asyncpg
+import os
 
 from alembic import context
 from app.db.models import Base, User
@@ -30,31 +32,6 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-
-def run_migrations_offline():
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
-    url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-    )
-
-    with context.begin_transaction():
-        context.run_migrations()
-
-
 def do_run_migrations(connection):
     context.configure(connection=connection, target_metadata=target_metadata)
 
@@ -69,25 +46,29 @@ async def run_migrations_online():
     and associate a connection with the context.
 
     """
-    connectable = AsyncEngine(
-        engine_from_config(
-            config.get_section(config.config_ini_section),
-            prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
-            future=True,
-        )
+
+    url = "postgresql+asyncpg://{user}:{password}@{host}/{database}".format(
+        user=os.environ["DB_USER"],
+        password=os.environ["DB_PASSWORD"],
+        host=os.environ["DB_HOST"],
+        database=os.environ["DB_NAME"]
     )
+    connectable = AsyncEngine(create_engine(url))
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
 
     await connectable.dispose()
-
     await set_up_vector_migration()
 
 # additional setup to get custom vector datatype working
 async def set_up_vector_migration():
-    url = config.get_main_option("asyncpg.url")
+    url = "postgresql://{user}:{password}@{host}/{database}".format(
+        user=os.environ["DB_USER"],
+        password=os.environ["DB_PASSWORD"],
+        host=os.environ["DB_HOST"],
+        database=os.environ["DB_NAME"]
+    )
     conn = await asyncpg.connect(
         dsn=url
     )
@@ -96,7 +77,5 @@ async def set_up_vector_migration():
     await register_vector(conn)
     await conn.close()
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    asyncio.run(run_migrations_online())
+
+asyncio.run(run_migrations_online())
