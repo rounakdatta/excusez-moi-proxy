@@ -7,7 +7,7 @@ from config.openai import openai_config
 import json
 
 
-async def find_answer_to_question(nearest_embeddings: list, search_query: str):
+async def find_answer_to_question(nearest_embeddings: list, search_query: str, sentence_splitter):
     """
     Seek the answer given the nearest embeddings (context) and the search query.
     This also decides whether to make a single or multiple chat completion calls.
@@ -23,12 +23,9 @@ async def find_answer_to_question(nearest_embeddings: list, search_query: str):
         chat_completion_responses = [await generate_chat_completion_external(prompt, search_query)]
     else:
         # else we bank on multiple API calls
-        n_of_splits = total_token_count // openai_config.completion_model_optimal_input_tokens
-        collection_of_calls = numpy.array_split(
-            nearest_text_sections, n_of_splits)
-        collection_of_calls = [". ".join(list(el))
-                               for el in collection_of_calls]
+        collection_of_calls = sentence_splitter.split_text(prompt)
 
+        print("total number of calls: ", len(collection_of_calls))
         chat_completion_responses = [await generate_chat_completion_external(call, search_query) for call in collection_of_calls]
 
     chat_completion_responses = [json.loads(

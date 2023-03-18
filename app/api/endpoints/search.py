@@ -4,10 +4,12 @@ from db.db import Database, get_db_conn
 from config.openai import get_openai_configured
 import utils.embeddings as emb
 import utils.completions as comp
+from config.text_split import get_completion_text_splitter
 import json
 
 router = fastapi.APIRouter()
 get_openai_configured()
+sentence_splitter = get_completion_text_splitter()
 
 
 @router.post("/answer")
@@ -19,7 +21,7 @@ async def answer_question(request: EmbeddingRequest, db: Database = fastapi.Depe
     # we can confidently send just the first embedding (assuming queries are small)
     nearest_sections = await emb.search_nearest_embeddings(db, search_query_embeddings[0], request.url)
 
-    responses = await comp.find_answer_to_question(nearest_sections, request.content)
+    responses = await comp.find_answer_to_question(nearest_sections, request.content, sentence_splitter)
 
     # we return OK to denote that the embedding is now ready to be used
     return fastapi.Response(content=json.dumps(responses), status_code=200)

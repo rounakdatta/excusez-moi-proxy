@@ -2,12 +2,12 @@ import fastapi
 from api.models.embeddings import EmbeddingRequest
 from db.db import Database, get_db_conn
 from config.openai import get_openai_configured
-from config.text_split import get_sentence_split_configured
+from config.text_split import get_embedding_text_splitter
 import utils.embeddings as emb
 
 router = fastapi.APIRouter()
 get_openai_configured()
-sentence_splitter = get_sentence_split_configured()
+sentence_splitter = get_embedding_text_splitter()
 
 
 @router.post("/prepare")

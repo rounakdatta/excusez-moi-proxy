@@ -48,10 +48,7 @@ async def break_down_document(payload: str, sentence_splitter):
         openai_config.embedding_model_optimal_input_tokens) + 1
 
     # we break it heuristically by text, so token count for each piece wouldn't be equal
-    individual_sentences = sentence_splitter.split([payload])[0]
-    individual_sentences = [str(el) for el in individual_sentences]
-    collection_of_inputs = numpy.array_split(individual_sentences, n_of_splits)
-    return [". ".join(list(el)) for el in collection_of_inputs]
+    return sentence_splitter.split_text(payload)
 
 
 async def generate_embeddings_external(payload):

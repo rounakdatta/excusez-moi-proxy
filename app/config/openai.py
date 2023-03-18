@@ -13,11 +13,11 @@ class OpenAIConfig:
     # determines how many tokens are allowed by the embeddings model
     # and how we optimize costs by breaking down inputs
     embedding_model_max_input_tokens = 8192
-    embedding_model_optimal_input_tokens = 200
+    embedding_model_optimal_input_tokens = 1000
 
     # determines how many tokens are allowed in total (input+output) by the chat completion model
     completion_model_max_total_tokens = 4096
-    completion_model_optimal_input_tokens = 2000
+    completion_model_optimal_input_tokens = 3000
 
     # model names to be used
     embedding_model_name = "text-embedding-ada-002"
