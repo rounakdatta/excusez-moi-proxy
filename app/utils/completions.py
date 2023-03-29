@@ -28,9 +28,17 @@ async def find_answer_to_question(nearest_embeddings: list, search_query: str, s
         print("total number of calls: ", len(collection_of_calls))
         chat_completion_responses = [await generate_chat_completion_external(call, search_query) for call in collection_of_calls]
 
-    chat_completion_responses = [json.loads(
-        el['choices'][0]['message']['content']) for el in chat_completion_responses]
-    return {"answers": chat_completion_responses}
+    answers = []
+    for response in chat_completion_responses:
+        try:
+            deserAnswer = json.loads(response['choices'][0]['message']['content'])
+            answers.append(deserAnswer)
+        except:
+            print("Malformed message:")
+            print(response['choices'][0]['message']['content'])
+            continue
+
+    return {"answers": answers}
 
 
 async def generate_chat_completion_external(chat_text: str, search_query: str):
@@ -38,26 +46,16 @@ async def generate_chat_completion_external(chat_text: str, search_query: str):
     Use external API (OpenAI) to generate the chat completions for a given chat context and a search.
     Contains all the prompt engineering techniques to receive structured answers.
     """
-    try:
-        searchResponse = openai.ChatCompletion.create(
-            model=openai_config.completion_model_name,
-            temperature=0,
-            messages=[
-                # later introduce system dialogues for better framing
-                {"role": "user", "content": 'Answer exactly the matching term, absolutely nothing else. Your answer should be in the form of a valid JSON {"resp": "<answer>"}. If there is no answer, just say KZZ'},
-                {"role": "assistant", "content": '{"resp": "KZZ"}'},
-                {"role": "user", "content": chat_text + ". " + search_query}
-            ]
-        )
+    # try:
+    searchResponse = openai.ChatCompletion.create(
+        model=openai_config.completion_model_name,
+        temperature=0,
+        messages=[
+            # later introduce system dialogues for better framing
+            {"role": "user", "content": 'Answer exactly the matching term, absolutely nothing else. Your answer should be strictly a valid JSON {"resp": "<answer>"}. If there is no definite answer, just say {"resp": "KZZ"}'},
+            {"role": "assistant", "content": '{"resp": "KZZ"}'},
+            {"role": "user", "content": chat_text + ". " + search_query}
+        ]
+    )
 
-        return searchResponse
-    # this is an explicit attempt to rule out any unexpected API failures and return any response we have
-    # TODO: refactor this later to handle better
-    except:
-        return {
-            "choices": [{
-                "message": {
-                    "content": '{"resp": "KZZ"}'
-                }
-            }]
-        }
+    return searchResponse
